@@ -37,10 +37,18 @@ def buildMarkdownFile(num_iterations: int, num_decks: int) -> None:
     sections.append(comparetitle)
     sections.append(linebreak)
 
-    # include num decks and iterations
     compareheader = "These are the results of the tests (number of iterations:  "+ str(num_iterations) + ", number of decks per iteration: " + str(num_decks) + \
-    ") performed on both methods. A \"+\" next to a method's stat indicates that method" \
-    " performed faster/better than the other. <br>(Further discussion below)" 
+    ") performed on both methods. " \
+    "For these tests, decks are saved to files in batches of 10,000, and stats are collected from each time a file was created. <br>" \
+    "gen_* represents the amount of time it took to make 10,000 arrays of 52 1s and 0s. <br>" \
+    "write_* represents the amount of time it took to write the file to disk. <br>" \
+    "read_* represents the amount of time it took to read the file from disk. <br>" \
+    "\*_avg_time is the average amount of time per file. <br>" \
+    "\*_total_time is the total amount of time per iteration (" + str(num_decks) + " decks). <br>" \
+    "\*_std is the standard deviation between times per iteration. <br>" \
+    "These values are then averaged across the " + str(num_iterations) + " iterations. <br>" \
+    "A \"+\" next to a method's stat indicates that method performed faster/better than the other. <br>" \
+    "(Further discussion below)"
     sections.append(compareheader)
     sections.append(comparetable)
     comparebody = "Given these results, Method 2 is the preferred method given its significantly faster read times " \
@@ -75,6 +83,7 @@ def buildMarkdownFile(num_iterations: int, num_decks: int) -> None:
     sections.append(method2table)
 
     # ----- Write to file -----
+    sections.append("<br> EOF <br>")
     for section in sections:
         mdstring += section+"\n"
     with open("DataGeneration.md", "w") as mdfile:
@@ -151,5 +160,5 @@ def generate_table(datapath: str) -> list:
         table = table_headers + table_divider + data_rows + data_average_row
         return table, averages_dict
 
-if __name__=="__main__":
-    buildMarkdownFile(10, 2000000)
+#if __name__=="__main__":
+#    buildMarkdownFile(10, 2000000)

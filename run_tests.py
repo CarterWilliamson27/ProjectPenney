@@ -5,7 +5,7 @@ import time
 
 # Run tests for .npy and .bin files
 # Run 10 iterations of 2 million decks each, save stats on results
-# Should take about 3 minutes to run all tests
+# Should take about 30 minutes to run all tests
 
 NUM_ITERATIONS = 10
 NUM_DECKS = 2000000
