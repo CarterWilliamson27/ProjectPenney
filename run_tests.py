@@ -39,8 +39,9 @@ print(f"Time to compile npy data: {t2-t1:.5f} seconds")
 print(f"Time to run bin tests: {t4-t3:.2f} seconds")
 print(f"Time to compile bin data: {t5-t4:.5f} seconds")
 
-#print('generating markdown file...')
-#buildMarkdownFile()
+print('generating markdown file...')
+buildMarkdownFile(NUM_ITERATIONS, NUM_DECKS)
+print('done!')
 
 
 

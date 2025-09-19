@@ -1,22 +1,55 @@
 import os
 import csv
-def buildMarkdownFile():
-    
-    # Build out seperate method to collect variables used in the mdfile
+import numpy as np
+def buildMarkdownFile(num_iterations: int, num_decks: int) -> None:
+
+    # Should include all data (see outputs folder) as well as the file sizes
     NPY_FILEPATH = os.path.join("testing", "data", "npydata")
     npydata = os.listdir(NPY_FILEPATH)
     npyfilesize_mb = os.path.getsize(os.path.join(NPY_FILEPATH, npydata[0]))/1000000
+
+    method1results = generate_table(os.path.join("testing", "outputs", "npy_compiled_output.csv"))
+    method1table = method1results[0]
+    method1averages = method1results[1]
+    method1averages['file_size (MB)'] = npyfilesize_mb
 
     BIN_FILEPATH = os.path.join("testing", "data", "bindata")
     bindata = os.listdir(BIN_FILEPATH)
     binfilesize_mb = os.path.getsize(os.path.join(BIN_FILEPATH, bindata[0]))/1000000
 
-    # Should include all data (see outputs folder) as well as the file sizes and total space taken up by the data dir
+    method2results = generate_table(os.path.join("testing", "outputs", "bin_compiled_output.csv"))
+    method2table = method2results[0]
+    method2averages = method2results[1]
+    method2averages['file_size (MB)'] = binfilesize_mb
+
+    comparetable = generate_comparison_table(method1averages, method2averages)
+    
     sections = []
     mdstring = ""
     linebreak = "___"
+
+    # ----- Begin document -----
     title = "## Project Penney Data Generation<br><sup>Carter Williamson & Ruihan Fang</sup>"
     sections.append(title)
+
+    # ----- Compare Methods -----
+    comparetitle = "### BLUF: Comparison of Methods"
+    sections.append(comparetitle)
+    sections.append(linebreak)
+
+    # include num decks and iterations
+    compareheader = "These are the results of the tests (number of iterations:  "+ str(num_iterations) + ", number of decks per iteration: " + str(num_decks) + \
+    ") performed on both methods. A \"+\" next to a method's stat indicates that method" \
+    " performed faster/better than the other. <br>(Further discussion below)" 
+    sections.append(compareheader)
+    sections.append(comparetable)
+    comparebody = "Given these results, Method 2 is the preferred method given its significantly faster read times " \
+    " and only a bit slower write times compared to Method 1, since the computationally-heavy part of the project (scoring) involves " \
+    " reading the files.  <br> It should be noted that the write times for Method 2 is a combination of the time to convert the numpy array to bytes" \
+    " and the time to write those bytes to a binary file.<br> (More detailed information on the methods in sections below)"
+    sections.append(comparebody)
+
+    
 
     # ----- Method 1 ------
 
@@ -24,11 +57,9 @@ def buildMarkdownFile():
     sections.append(method1title)
     sections.append(linebreak)
     method1body = "The first method was to follow what was shown in class and store the decks in numpy arrays, then save them as .npy files." \
-    " Each .npy file contains 10,000 decks, and each is " + str(npyfilesize_mb) + " MB." \
-    "\n\nTable of results: "
+    "<br>Each .npy file contains 10,000 decks, and each is " + str(npyfilesize_mb) + " MB." \
+    "<br>Table of results: "
     sections.append(method1body)
-    # Method to generate table
-    method1table = generate_table(os.path.join("testing", "outputs", "npy_compiled_output.csv"))
     sections.append(method1table)
 
     sections.append(linebreak)
@@ -37,19 +68,47 @@ def buildMarkdownFile():
     method2title = "### Method 2: Store arrays in .bin files"
     sections.append(method2title)
     sections.append(linebreak)
-    method2body = "The first method was to take the numpy arrays and use the to_bytes method to store them in binary files" \
-    " Each .bin file contains 10,000 decks, and each is " + str(binfilesize_mb) + " MB." \
-    "\n\nTable of results: "
+    method2body = "The second method was to essentially copy the first method, but then use the numpy.ndarray.tobytes method to store the decks in binary files." \
+    "<br>Each .bin file contains 10,000 decks, and each is " + str(binfilesize_mb) + " MB." \
+    "<br>Table of results: "
     sections.append(method2body)
-    method2table = generate_table(os.path.join("testing", "outputs", "bin_compiled_output.csv"))
     sections.append(method2table)
 
+    # ----- Write to file -----
     for section in sections:
         mdstring += section+"\n"
     with open("DataGeneration.md", "w") as mdfile:
         mdfile.write(mdstring)
 
-def generate_table(datapath: str):
+def generate_comparison_table(method1averages: dict, method2averages: dict) -> str:
+    # Vertical stack of methods with field names on the left column
+
+    # First combine write_time and convert_time for method2
+    for fieldsuffix in ["avg_time", "total_time"]:
+        method2averages["write_"+fieldsuffix] += method2averages["con_"+fieldsuffix]
+        method2averages["write_"+fieldsuffix] = round(method2averages["write_"+fieldsuffix], 5) 
+    
+    # little bit of stats: adding two independent standard deviations a and b = sqrt(a^2 + b^2)
+    method2averages["write_std"] = round(np.sqrt((method2averages["con_std"]**2) + method2averages["write_std"]**2), 5)
+
+    # Now generate table
+    headers = "| stat | Method 1 | Method 2 |\n" \
+    "|---|---|--|\n"
+
+    data_rows = ""
+    for field in method1averages:
+        if method1averages[field] < method2averages[field]:
+            data_rows += field + "|+" + str(method1averages[field]) + "|" + str(method2averages[field]) + "|"
+        else:
+            data_rows += field + "|" + str(method1averages[field]) + "|+" + str(method2averages[field]) + "|"
+
+        data_rows+="\n"
+    
+    return headers+data_rows
+
+
+
+def generate_table(datapath: str) -> list:
     
     with open(datapath, 'r') as file:
         csv_reader = csv.reader(file) 
@@ -64,17 +123,33 @@ def generate_table(datapath: str):
         
         # Actual data
         data_rows = "|"
+        average_of_all_data = [0] * len(field_names)
+        num_iterations = 0
         for row in csv_reader:
+            i = 0
+            num_iterations +=1
             for field in row:
+                average_of_all_data[i] += float(field)
                 data_rows += " " + str(field) + " |"
+                i+=1
             data_rows+="\n|"
         
+        data_average_row = "| Average |"
+        averages_dict = {}
+        i = 1 # Skip iteration number
+        for field in average_of_all_data[1:]: # Skip iteration number
+            average = field/num_iterations
+            average = round(average, 5)
+            data_average_row += " " + str(average) + " |"
+            averages_dict[field_names[i]] = average
+            i+=1
+
+
         table_headers+="\n"
         table_divider+="\n"
         data_rows = data_rows[:-1] # chop off last |
-        table = table_headers + table_divider + data_rows
-        return table
-
+        table = table_headers + table_divider + data_rows + data_average_row
+        return table, averages_dict
 
 if __name__=="__main__":
-    buildMarkdownFile()
+    buildMarkdownFile(10, 2000000)

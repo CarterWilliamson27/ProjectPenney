@@ -1,9 +1,24 @@
 ## Project Penney Data Generation<br><sup>Carter Williamson & Ruihan Fang</sup>
+### BLUF: Comparison of Methods
+___
+These are the results of the tests (number of iterations:  10, number of decks per iteration: 2000000) performed on both methods. A "+" next to a method's stat indicates that method performed faster/better than the other. <br>(Further discussion below)
+| stat | Method 1 | Method 2 |
+|---|---|--|
+gen_avg_time|0.01388|+0.01386|
+gen_total_time|2.7764|+2.7717|
+gen_std|+0.00274|0.00336|
+write_avg_time|+0.00182|0.002|
+write_total_time|+0.36375|0.39902|
+write_std|+0.00192|0.00305|
+read_avg_time|0.02929|+0.01776|
+read_total_time|5.8575|+3.5525|
+read_std|+0.00309|0.00375|
+file_size (MB)|0.520128|+0.52|
+
+Given these results, Method 2 is the preferred method given its significantly faster read times  and only a bit slower write times compared to Method 1, since the computationally-heavy part of the project (scoring) involves  reading the files.  <br> It should be noted that the write times for Method 2 is a combination of the time to convert the numpy array to bytes and the time to write those bytes to a binary file.<br> (More detailed information on the methods in sections below)
 ### Method 1: Store arrays in .npy files
 ___
-The first method was to follow what was shown in class and store the decks in numpy arrays, then save them as .npy files. Each .npy file contains 10,000 decks, and each is 0.520128 MB.
-
-Table of results: 
+The first method was to follow what was shown in class and store the decks in numpy arrays, then save them as .npy files.<br>Each .npy file contains 10,000 decks, and each is 0.520128 MB.<br>Table of results: 
 | iteration | gen_avg_time | gen_total_time | gen_std | write_avg_time | write_total_time | write_std | read_avg_time | read_total_time | read_std |
 |---|---|---|---|---|---|---|---|---|---|
 | 1 | 0.01389 | 2.78 | 0.003338 | 0.00207 | 0.414 | 0.002773 | 0.02916 | 5.832 | 0.003452 |
@@ -16,13 +31,11 @@ Table of results:
 | 8 | 0.014 | 2.799 | 0.00295 | 0.001789 | 0.3577 | 0.001968 | 0.02905 | 5.81 | 0.003304 |
 | 9 | 0.01407 | 2.812 | 0.00275 | 0.001898 | 0.3794 | 0.001953 | 0.02907 | 5.812 | 0.00332 |
 | 10 | 0.013916 | 2.783 | 0.003445 | 0.001539 | 0.3079 | 0.002197 | 0.0295 | 5.9 | 0.00298 |
-
+| Average | 0.01388 | 2.7764 | 0.00274 | 0.00182 | 0.36375 | 0.00192 | 0.02929 | 5.8575 | 0.00309 |
 ___
 ### Method 2: Store arrays in .bin files
 ___
-The first method was to take the numpy arrays and use the to_bytes method to store them in binary files Each .bin file contains 10,000 decks, and each is 0.52 MB.
-
-Table of results: 
+The second method was to essentially copy the first method, but then use the numpy.ndarray.tobytes method to store the decks in binary files.<br>Each .bin file contains 10,000 decks, and each is 0.52 MB.<br>Table of results: 
 | iteration | gen_avg_time | gen_total_time | gen_std | write_avg_time | write_total_time | write_std | con_avg_time | con_total_time | con_std | read_avg_time | read_total_time | read_std |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | 0.013725 | 2.744 | 0.003202 | 0.00093 | 0.186 | 0.001953 | 0.001059 | 0.2118 | 0.001403 | 0.0178 | 3.56 | 0.003294 |
@@ -35,4 +48,4 @@ Table of results:
 | 8 | 0.014114 | 2.822 | 0.003202 | 0.0009565 | 0.1914 | 0.002342 | 0.001075 | 0.215 | 0.001778 | 0.01764 | 3.53 | 0.00299 |
 | 9 | 0.013695 | 2.738 | 0.003868 | 0.001017 | 0.2032 | 0.002642 | 0.001265 | 0.253 | 0.002405 | 0.01744 | 3.486 | 0.005184 |
 | 10 | 0.01379 | 2.758 | 0.00554 | 0.001145 | 0.229 | 0.003983 | 0.0007496 | 0.1499 | 0.002537 | 0.01741 | 3.482 | 0.006176 |
-
+| Average | 0.01386 | 2.7717 | 0.00336 | 0.00091 | 0.18199 | 0.00239 | 0.00109 | 0.21703 | 0.00189 | 0.01776 | 3.5525 | 0.00375 |
