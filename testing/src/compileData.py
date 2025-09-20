@@ -10,7 +10,7 @@ import os
 
 def write_raw_data_to_csv(data: list, file_name: str) -> None:
     # data[headers[], actual data[]*]
-    file_path = os.path.join('testing', 'outputs', file_name)
+    file_path = os.path.join('testing', 'outputs', 'data', file_name)
     if os.path.exists(file_path):
         os.remove(file_path) # clean out data
     
@@ -29,7 +29,7 @@ def write_raw_data_to_csv(data: list, file_name: str) -> None:
 
 def write_compiled_data_to_csv(data: list, file_name: str) -> None:
     # data[headers[], actual data[]*]
-    file_path = os.path.join('testing', 'outputs', file_name)
+    file_path = os.path.join('testing', 'outputs', 'data', file_name)
     if os.path.exists(file_path):
         os.remove(file_path) # clean out data
     

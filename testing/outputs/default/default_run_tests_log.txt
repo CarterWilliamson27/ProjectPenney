@@ -1,0 +1,17 @@
+Hello! You can view the writeup, script log, and data outputs from the default parameters (10 iterations, 2000000 decks per iteration) attesting/outputs/default.
+The tests with the default parameters take about 3 minutes on a 13th Gen Intel i7 CPU with 16GB of RAM, so they may take longer depending on how beefy your setup is.
+(Please be nice, I did not write strong input validation)
+Would you like to run tests with custom parameters (y) or rerun the default tests (n)? (y/n): n
+running tests for Method 1 (10 iterations, 2000000 decks per iteration)
+compiling Method 1 data
+running tests for Method 2 (10 iterations, 2000000 decks per iteration)
+compiling Method 2 data
+done!
+Meta-stats for 10 iterations of tests, 2000000 decks per iteration: 
+Total time for program to complete: 162.95 seconds
+Time to run Method 1 tests: 95.73 seconds
+Time to compile Method 1 data: 0.00704 seconds
+Time to run Method 2 tests: 67.21 seconds
+Time to compile Method 2 data: 0.00853 seconds
+generating markdown file...
+done! You can find the summary and script log at /testing/outputs!
