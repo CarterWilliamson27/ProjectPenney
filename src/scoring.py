@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import csv
 
 def score_files(path_to_data: str, path_to_scores: str) -> None:
     # For each file in path_to_data, score each deck in the file against the 56 possible games
@@ -44,6 +45,9 @@ def score_files(path_to_data: str, path_to_scores: str) -> None:
         # Once we are done scoring, rename the file to indicate that it has been scored
         os.rename(file_path, os.path.join(path_to_data, "scored_"+file_name))
 
+    # combine scores from these new files with old scores
+    scores = read_previous_scores(path_to_scores=path_to_scores, data_dict=scores)
+
     # Save scores to csv
     save_scores(path_to_scores, scores)
                         
@@ -85,6 +89,26 @@ def score_deck(deck: bytes, p1_choice: str, p2_choice: str) -> tuple[int, int, i
     
     return p1_tricks, p1_cards, p2_tricks, p2_cards
 
+def read_previous_scores(path_to_scores: str, data_dict: dict) -> dict:
+    if not os.path.exists(path_to_scores): # first time scoring ever
+        return data_dict
+    
+
+    with open(path_to_scores, 'r') as file:
+        csv_reader = csv.reader(file, skipinitialspace=True)
+
+         # Header row
+        field_names = next(csv_reader)
+
+        for row in csv_reader:
+            for i in range(2, len(row)): # skip the p1 and p2 choices, we manually access them
+                p1_choice = row[0]
+                p2_choice = row[1]
+                data_dict[p1_choice][p2_choice][field_names[i]] += int(row[i])
+
+
+    return data_dict
+
 def update_scores(results: list, scores_dict: dict) -> dict:
     # example result: [p1_choice: 000, p2_choice: 001, p1_tricks: 5, p1_cards: 29, p2_tricks: 2, p2_cards: 21]
     # output: dictionary[p1_choice][p2_choice][wins_tricks|loses_tricks|ties_tricks|wins_cards|loses_cards|ties_cards]
@@ -119,14 +143,18 @@ def update_scores(results: list, scores_dict: dict) -> dict:
 def save_scores(path: str, scores: dict) -> None:
     extracted_field_names = [item for item in scores['000']['001']] # In case we change order/names, just use what the dictionary has
     field_names = "p1_choice, p2_choice, "+ ", ".join(extracted_field_names)
-    
     formatted_scores = ""
     for p1_choice in scores:
         for p2_choice in scores[p1_choice]:
             formatted_scores += p1_choice + "," + p2_choice + ","
             for item in scores[p1_choice][p2_choice]:
                 formatted_scores += str(scores[p1_choice][p2_choice][item]) + ","
+
+            # chop off last comma 
+            formatted_scores = formatted_scores[:-1]  
+            # add newline  
             formatted_scores += "\n"
+            
     with open(os.path.join(path), "w") as file:
         file.write(field_names + "\n")
         file.write(formatted_scores)

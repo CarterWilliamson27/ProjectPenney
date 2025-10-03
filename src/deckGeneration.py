@@ -1,8 +1,5 @@
 import os
 import numpy as np
-import re
-
-
 
 def getRandomSeed(path_to_data: str) -> int:
     # Read data dir, if empty return 0
@@ -10,7 +7,6 @@ def getRandomSeed(path_to_data: str) -> int:
     # ...or just start random_seed at zero and return the number of files in the directory
     files = os.listdir(path_to_data)
     return len(files)
-
 
 def makeDecks(half_deck: int, num_decks: int, num_decks_file: int, path_to_data: str) -> None:
 
