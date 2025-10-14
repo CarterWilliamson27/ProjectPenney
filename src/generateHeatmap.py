@@ -15,8 +15,8 @@ def format_data(title: str, data: pd.DataFrame) -> pd.DataFrame:
     # Output: only the data related to the given title
     title = title.lower()
     refined_data = data[['p1_choice', 'p2_choice', 'games_total']]
-    winperc = data[f"p1_win%_{title}"].apply(lambda x: x[:-4]) # Sheer off decimal and %
-    tieperc = data[f"{title}_tie%"].apply(lambda x: "("+x[:-4]+")") # Add () around value, sheer off decimal and %
+    winperc = data[f"p1_win%_{title}"].apply(lambda x: str(int((round(float(x[:-1]), 0))))) # round value
+    tieperc = data[f"{title}_tie%"].apply(lambda x: "("+str(int((round(float(x[:-1]), 0))))+")") # Add () around rounded value 
     refined_data.insert(loc=0, column="winperc", value=winperc.astype(float))
     refined_data.insert(loc=0, column="win_tie_perc", value=winperc+tieperc)
     return refined_data
